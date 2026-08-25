@@ -1,0 +1,315 @@
+{% extends 'admin_base.html' %}
+
+{% block title %}🧠 AI Assistant (RAG){% endblock %}
+
+{% block content %}
+<style>
+  .rag-hero {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    border-radius: 16px;
+    padding: 32px 36px 28px;
+    margin-bottom: 28px;
+    color: #fff;
+    position: relative;
+    overflow: hidden;
+  }
+  .rag-hero::before {
+    content: "";
+    position: absolute;
+    top: -60px; right: -60px;
+    width: 220px; height: 220px;
+    background: radial-gradient(circle, rgba(99,179,237,0.18) 0%, transparent 70%);
+    border-radius: 50%;
+  }
+  .rag-hero h1 { font-size: 1.7rem; margin: 0 0 6px; font-weight: 700; letter-spacing: -0.3px; }
+  .rag-hero p  { margin: 0; opacity: 0.75; font-size: 0.95rem; }
+
+  .rag-vendor-bar {
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 20px 24px;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  }
+  .rag-vendor-bar label { font-weight: 600; color: #2d3748; white-space: nowrap; }
+  .rag-vendor-bar select {
+    padding: 9px 14px;
+    border: 1.5px solid #cbd5e0;
+    border-radius: 8px;
+    font-size: 0.92rem;
+    min-width: 220px;
+    background: #f7fafc;
+    cursor: pointer;
+  }
+  .rag-vendor-bar select:focus { outline: none; border-color: #4299e1; box-shadow: 0 0 0 3px rgba(66,153,225,0.15); }
+  .rag-btn-primary {
+    background: linear-gradient(135deg, #3182ce, #2b6cb0);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 9px 20px;
+    font-weight: 600;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: opacity 0.2s, transform 0.1s;
+  }
+  .rag-btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
+
+  .rag-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 14px;
+    margin-bottom: 26px;
+  }
+  .rag-stat-card {
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 18px 20px;
+    text-align: center;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+    transition: transform 0.15s;
+  }
+  .rag-stat-card:hover { transform: translateY(-2px); }
+  .rag-stat-card .stat-value { font-size: 2rem; font-weight: 700; color: #2b6cb0; }
+  .rag-stat-card .stat-label { font-size: 0.8rem; color: #718096; margin-top: 2px; }
+
+  .rag-tabs {
+    display: flex;
+    gap: 0;
+    border-bottom: 2px solid #e2e8f0;
+    margin-bottom: 24px;
+  }
+  .rag-tab {
+    padding: 11px 28px;
+    cursor: pointer;
+    font-weight: 600;
+    color: #718096;
+    border: none;
+    background: none;
+    border-bottom: 3px solid transparent;
+    margin-bottom: -2px;
+    transition: color 0.2s, border-color 0.2s;
+    font-size: 0.95rem;
+  }
+  .rag-tab.active { color: #2b6cb0; border-bottom-color: #2b6cb0; }
+  .rag-tab:hover:not(.active) { color: #2d3748; }
+
+  .rag-panel { display: none; }
+  .rag-panel.active { display: block; }
+
+  .rag-form-card {
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    padding: 28px 30px;
+    box-shadow: 0 1px 6px rgba(0,0,0,0.06);
+  }
+  .rag-form-card label {
+    display: block;
+    font-weight: 600;
+    color: #2d3748;
+    margin-bottom: 6px;
+    font-size: 0.9rem;
+  }
+  .rag-form-card input[type="text"],
+  .rag-form-card textarea,
+  .rag-form-card select {
+    width: 100%;
+    padding: 9px 12px;
+    border: 1.5px solid #cbd5e0;
+    border-radius: 8px;
+    font-size: 0.92rem;
+    background: #f7fafc;
+    margin-bottom: 16px;
+    transition: border-color 0.2s;
+  }
+  .rag-form-card input[type="text"]:focus,
+  .rag-form-card textarea:focus,
+  .rag-form-card select:focus {
+    outline: none;
+    border-color: #4299e1;
+    background: #fff;
+    box-shadow: 0 0 0 3px rgba(66,153,225,0.12);
+  }
+  .rag-form-card input[type="file"] {
+    padding: 6px 0;
+    margin-bottom: 16px;
+  }
+  .field-hint { font-size: 0.78rem; color: #718096; margin-top: -12px; margin-bottom: 14px; }
+
+  .invoice-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+  .invoice-chip {
+    background: #ebf8ff;
+    color: #2b6cb0;
+    border: 1px solid #bee3f8;
+    border-radius: 20px;
+    padding: 4px 12px;
+    font-size: 0.82rem;
+    font-weight: 500;
+  }
+
+  .rag-empty {
+    text-align: center;
+    padding: 48px 20px;
+    color: #a0aec0;
+  }
+  .rag-empty .empty-icon { font-size: 3rem; display: block; margin-bottom: 10px; }
+
+  .no-vendor-msg {
+    background: #fffbeb;
+    border: 1px solid #f6e05e;
+    border-radius: 12px;
+    padding: 16px 20px;
+    color: #744210;
+    margin-bottom: 20px;
+    font-size: 0.9rem;
+  }
+</style>
+
+<div style="padding: 20px 30px;">
+
+  <!-- Hero -->
+  <div class="rag-hero">
+    <h1>🧠 AI Invoice Assistant</h1>
+    <p>Ask natural language questions about invoices — powered by ChromaDB vector search &amp; CrewAI agents.</p>
+  </div>
+
+  <!-- Vendor Selector -->
+  <form method="GET" action="/admin/ai_assistant">
+    <div class="rag-vendor-bar">
+      <label for="vendor_id_select">Select Vendor Workspace:</label>
+      <select name="vendor_id" id="vendor_id_select" onchange="this.form.submit()">
+        <option value="">— Choose a vendor —</option>
+        {% for v in vendors %}
+          {% set vid = v.VendorName | lower | replace(' ', '_') %}
+          <option value="{{ vid }}" {% if selected_vendor == vid %}selected{% endif %}>
+            {{ v.VendorName }} ({{ vid }})
+          </option>
+        {% endfor %}
+      </select>
+      <button type="submit" class="rag-btn-primary">Load Workspace</button>
+    </div>
+  </form>
+
+  {% if not selected_vendor %}
+    <div class="no-vendor-msg">
+      ℹ️ Select a vendor above to view their indexed invoice data and ask questions.
+    </div>
+  {% endif %}
+
+  {% if selected_vendor %}
+
+    <!-- Stats -->
+    {% if data %}
+    <div class="rag-stats-grid">
+      <div class="rag-stat-card">
+        <div class="stat-value">{{ data.chunk_count }}</div>
+        <div class="stat-label">Your Indexed Chunks</div>
+      </div>
+      <div class="rag-stat-card">
+        <div class="stat-value">{{ data.invoice_count }}</div>
+        <div class="stat-label">Invoices Indexed</div>
+      </div>
+      <div class="rag-stat-card">
+        <div class="stat-value">{{ data.total_chunks }}</div>
+        <div class="stat-label">Total Chunks in DB</div>
+      </div>
+      <div class="rag-stat-card">
+        <div class="stat-value">{{ data.tenant_count }}</div>
+        <div class="stat-label">Active Vendor Tenants</div>
+      </div>
+    </div>
+
+    {% if data.invoices %}
+    <div style="background:#fff; border:1px solid #e2e8f0; border-radius:12px; padding:16px 20px; margin-bottom:22px;">
+      <strong style="color:#2d3748; font-size:0.9rem;">📁 Indexed Invoices for <code>{{ selected_vendor }}</code>:</strong>
+      <div class="invoice-chips">
+        {% for inv in data.invoices %}
+          <span class="invoice-chip">{{ inv }}</span>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+    {% endif %}
+
+    <!-- Tabs -->
+    <div class="rag-tabs">
+      <button class="rag-tab active" onclick="switchTab('ingest', this)">📥 Ingest Invoices</button>
+      <button class="rag-tab" onclick="switchTab('query', this)">🔍 Query &amp; Ask</button>
+    </div>
+
+    <!-- Ingest Panel -->
+    <div id="panel-ingest" class="rag-panel active">
+      <div class="rag-form-card">
+        <h4 style="margin-top:0; color:#2d3748;">Upload Invoice Documents for <code>{{ selected_vendor }}</code></h4>
+        <p style="font-size:0.88rem; color:#718096; margin-bottom:20px;">
+          PDF and TXT invoices will be chunked and stored in ChromaDB under <code>vendor_id = '{{ selected_vendor }}'</code>.
+        </p>
+        <form action="/admin/rag_ingest" method="POST" enctype="multipart/form-data">
+          <input type="hidden" name="vendor_id" value="{{ selected_vendor }}">
+
+          <label for="invoice_files">Upload PDF / TXT Invoice Files</label>
+          <input type="file" id="invoice_files" name="invoice_files" multiple accept=".pdf,.txt">
+          <p class="field-hint">You may select multiple files at once.</p>
+
+          <label for="raw_text_input">Or Paste Raw Invoice Text (Optional)</label>
+          <textarea id="raw_text_input" name="raw_text" rows="5"
+            placeholder="INVOICE: INV-999&#10;Vendor: {{ selected_vendor }}&#10;Amount: $5,000&#10;Description: IT Services"></textarea>
+
+          <label for="invoice_number_input">Invoice Number / Prefix (Optional)</label>
+          <input type="text" id="invoice_number_input" name="invoice_number" placeholder="e.g. INV-001">
+          <p class="field-hint">If left blank, the filename (without extension) is used as the invoice number.</p>
+
+          <button type="submit" class="rag-btn-primary" style="width:auto;">⚡ Upload &amp; Ingest</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Query Panel -->
+    <div id="panel-query" class="rag-panel">
+      <div class="rag-form-card">
+        <h4 style="margin-top:0; color:#2d3748;">Ask a Question About <code>{{ selected_vendor }}</code>'s Invoices</h4>
+        <p style="font-size:0.88rem; color:#718096; margin-bottom:20px;">
+          The CrewAI agent retrieves relevant chunks from ChromaDB and synthesizes a grounded answer — strictly filtered to <code>{{ selected_vendor }}</code>.
+        </p>
+        <form action="/admin/rag_query" method="POST">
+          <input type="hidden" name="vendor_id" value="{{ selected_vendor }}">
+
+          <label for="query_input">Your Question</label>
+          <textarea id="query_input" name="query" rows="3" required
+            placeholder="e.g. What is the total invoice amount? Which line items are listed?"></textarea>
+
+          <label for="invoice_filter_select">Filter by Specific Invoice (Optional)</label>
+          <select id="invoice_filter_select" name="invoice_filter">
+            <option value="">— All invoices for {{ selected_vendor }} —</option>
+            {% if data and data.invoices %}
+              {% for inv in data.invoices %}
+                <option value="{{ inv }}">{{ inv }}</option>
+              {% endfor %}
+            {% endif %}
+          </select>
+
+          <button type="submit" class="rag-btn-primary" style="width:auto; margin-top:4px;">🚀 Ask Question</button>
+        </form>
+      </div>
+    </div>
+
+  {% endif %}
+
+</div>
+
+<script>
+  function switchTab(name, btn) {
+    document.querySelectorAll('.rag-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.rag-panel').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('panel-' + name).classList.add('active');
+  }
+</script>
+{% endblock %}

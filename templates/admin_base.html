@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{% block title %} Admin base {% endblock %}</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
+      crossorigin="anonymous"
+    />
+    <link rel="stylesheet" href="/static/style.css" />
+	 <style>
+        .section-title {
+            color: #4b3832;
+            margin-top: 30px;
+            margin-bottom: 15px;
+            border-left: 5px solid #8d6e63;
+            padding-left: 10px;
+        }
+		input[type="file"], button { width: 100%; margin: 10px 0; padding: 10px; }
+        .card {
+            border-radius: 40px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            padding: 40px;
+        }
+        .card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            transition: 0.3s;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+        }
+        a.button {
+            display: inline-block;
+            margin-top: 10px;
+            background: #007bff;
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 8px;
+        }
+        a.button:hover {
+            background: #0056b3;
+        }
+
+        .nav-btn {
+            background-color: #0077b6;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 10px 20px;
+            text-decoration: none;
+        }
+        .nav-btn:hover {
+            background-color: #023e8a;
+            color: white;
+        }
+        footer {
+            background: #023e8a;
+            color: white;
+            text-align: center;
+            padding: 15px;
+            margin-top: 40px;
+        }
+		.spinner {
+			border: 8px solid #f3f3f3;
+			border-top: 8px solid brown;
+			border-radius: 50%;
+			width: 60px;
+			height: 60px;
+			animation: spin 0.9s linear infinite;
+		}
+
+		@keyframes spin {
+			0% { transform: rotate(0deg); }
+			100% { transform: rotate(360deg); }
+		}
+    </style>
+  </head>
+  <body>
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    <div id="flash-messages">
+      {% for category, message in messages %}
+        <div class="alert alert-{{ category }} mt-2 text-center"
+             style="
+               background-color: {% if category == 'error' %}#ffcccc{% elif category == 'success' %}#ccffcc{% else %}#e6e6e6{% endif %};
+               color: {% if category == 'error' %}#b30000{% elif category == 'success' %}#006600{% else %}#333333{% endif %};
+               border: 1px solid {% if category == 'error' %}#b30000{% elif category == 'success' %}#006600{% else %}#999999{% endif %};
+               font-weight: bold;
+               border-radius: 5px;
+               padding: 10px;
+               transition: opacity 0.5s ease;
+             ">
+          {{ message }}
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+{% endwith %}
+
+<div id="loading-overlay"
+     style="
+         position: fixed;
+         top: 0; left: 0;
+         width: 100%; height: 100%;
+         background: rgba(255,255,255,0.7);
+         display: none;
+         justify-content: center;
+         align-items: center;
+         z-index: 99999;
+     ">
+    <div class="spinner"></div>
+</div>
+
+    <script>
+      // Wait for page to load
+      document.addEventListener("DOMContentLoaded", function () {
+        // Automatically hide flash messages after 3 seconds (3000 ms)
+        setTimeout(function () {
+          const flashContainer = document.getElementById("flash-messages");
+          if (flashContainer) {
+            flashContainer.style.transition = "opacity 0.5s ease";
+            flashContainer.style.opacity = "0"; // fade out
+
+            // Remove completely after fade-out
+            setTimeout(() => flashContainer.remove(), 500);
+          }
+        }, 2000);
+      });
+
+		document.addEventListener("DOMContentLoaded", function () {
+			const forms = document.querySelectorAll("form");
+
+			forms.forEach(form => {
+				form.addEventListener("submit", function () {
+					document.getElementById("loading-overlay").style.display = "flex";
+				});
+			});
+		});
+	</script>
+
+	
+    <div class="main_page">
+        
+            <header class="header_section">
+                <div class="header_canvas">
+                <img class='logo' src="/static/logo.png" alt="logo" height="80px" width="130px">
+				<h4> AI-Powered Vendor Invoice Management Dashboard	</h4>
+            <div class="nav_side_buttons">
+				<img src="/static/admin_icon.png" alt="logo" height="80px" width="80px">
+                <img src="/static/login_icon.png" alt="">
+                <a class='header_register_button' href="/login"><button>Logout</button></a>
+            </div>
+            
+            </header>
+
+            <main class="main_section">
+                {% block content %}
+
+                {% endblock %}
+            </main>
+
+            <footer class="footer_section">
+                <div class="footer_canvas"></div>
+                <p>
+                    &copy; 2026 Vendor Invoice Management (SPAR Infosys) all rights reserved
+                </p>
+            </footer>
+  </body>
+</html>

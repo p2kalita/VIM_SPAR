@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% if vendor_id %}Invoice RAG Portal - {{ vendor_id }}{% else %}Multi-Tenant Invoice RAG Portal{% endif %}</title>
+</head>
+<body style="font-family: Arial, sans-serif; margin: 40px; color: #111; max-width: 850px; line-height: 1.6;">
+
+{% if not vendor_id %}
+    <!-- ── 1. Login View ────────────────────────────────────────────────── -->
+    <h1>🧾 Multi-Tenant Invoice RAG Portal</h1>
+    <p>Sign in with your <b>Vendor Name / ID</b> to access your isolated invoice workspace.</p>
+    <hr>
+    
+    <h2>Vendor Login</h2>
+    <form action="/" method="GET">
+        <p>
+            <label><b>Vendor ID:</b><br>
+            <input type="text" name="vendor_id" placeholder="e.g. vendor_alpha or vendor_beta" required style="padding: 8px; width: 300px; font-size: 14px;">
+            </label>
+        </p>
+        <p>
+            <button type="submit" style="padding: 8px 16px; font-size: 14px; cursor: pointer;">Sign In as Vendor &rarr;</button>
+        </p>
+    </form>
+
+{% else %}
+    <!-- ── 2. Vendor Workspace View ────────────────────────────────────── -->
+    <div style="background: #f0f4f8; padding: 15px 20px; border-radius: 6px; margin-bottom: 25px;">
+        <h2 style="margin: 0 0 5px 0;">🏢 Logged in as Vendor: <span style="color: #2b6cb0;">{{ vendor_id }}</span></h2>
+        <p style="margin: 0;">Data is isolated with metadata <code>tenant_id = '{{ vendor_id }}'</code> | <a href="/"><b>🚪 Switch / Logout Vendor</b></a></p>
+    </div>
+
+    <!-- Stats Table -->
+    <table border="1" cellpadding="8" cellspacing="0" style="border-collapse: collapse; width: 100%; margin-bottom: 25px;">
+        <tr style="background: #e2e8f0;">
+            <th>Your Indexed Chunks</th>
+            <th>Your Invoices Count</th>
+            <th>Total Chunks in DB</th>
+            <th>Active Vendors in DB</th>
+        </tr>
+        <tr align="center">
+            <td><b>{{ data.chunk_count }}</b></td>
+            <td><b>{{ data.invoice_count }}</b></td>
+            <td>{{ data.total_chunks }}</td>
+            <td>{{ data.tenant_count }}</td>
+        </tr>
+    </table>
+
+    <!-- Stored Invoices -->
+    <div style="margin-bottom: 25px;">
+        <h3>📁 Invoices stored under <code>{{ vendor_id }}</code>:</h3>
+        <ul>
+            {% if data.invoices %}
+                {% for inv in data.invoices %}
+                    <li><b>{{ inv }}</b></li>
+                {% endfor %}
+            {% else %}
+                <li><i>No invoices uploaded yet for this vendor.</i></li>
+            {% endif %}
+        </ul>
+        <small style="color: #666;">Other vendors in system: {{ all_tenants_display }}</small>
+    </div>
+    
+    <hr>
+
+    <!-- Step 1 & 2: Ingestion Form -->
+    <h2>📥 1. Ingest Invoices for <code>{{ vendor_id }}</code></h2>
+    <p>Upload PDF/TXT documents or paste invoice text directly. They will be indexed under <code>tenant_id: {{ vendor_id }}</code>.</p>
+    
+    <form action="/ingest" method="POST" enctype="multipart/form-data" style="background: #fafafa; padding: 15px; border: 1px solid #ddd; border-radius: 4px; margin-bottom: 20px;">
+        <input type="hidden" name="vendor_id" value="{{ vendor_id }}">
+        
+        <p>
+            <label><b>Option A: Upload PDF / TXT Invoice Files</b><br>
+            <input type="file" name="files" multiple style="margin-top: 5px;">
+            </label>
+        </p>
+
+        <p>
+            <label><b>Option B: Paste Raw Invoice Text (Optional)</b><br>
+            <textarea name="raw_text" rows="4" style="width: 100%; font-family: monospace; padding: 8px;" placeholder="INVOICE: INV-999&#10;Vendor: {{ vendor_id }}&#10;Amount: $5,000&#10;Description: IT Consultation"></textarea>
+            </label>
+        </p>
+
+        <p>
+            <label><b>Invoice Number / Prefix (Optional):</b><br>
+            <input type="text" name="invoice_number" placeholder="e.g. INV-001" style="padding: 6px; width: 250px;">
+            </label>
+        </p>
+
+        <p>
+            <button type="submit" style="padding: 8px 18px; font-size: 14px; font-weight: bold; cursor: pointer; background: #2b6cb0; color: white; border: none; border-radius: 4px;">⚡ Upload & Ingest</button>
+        </p>
+    </form>
+
+    <hr>
+
+    <!-- Step 3: Query Form -->
+    <h2>🔍 2. Query Invoices (Tenant-Isolated Search)</h2>
+    <p>Ask natural language questions. The CrewAI agent retrieval pipeline only retrieves chunks tagged with <code>tenant_id = '{{ vendor_id }}'</code>.</p>
+
+    <form action="/query" method="POST" style="background: #fafafa; padding: 15px; border: 1px solid #ddd; border-radius: 4px;">
+        <input type="hidden" name="vendor_id" value="{{ vendor_id }}">
+        
+        <p>
+            <label><b>Your Question:</b><br>
+            <textarea name="query" rows="3" style="width: 100%; font-size: 14px; padding: 8px;" placeholder="e.g. What is the total invoice amount and what items are listed?" required></textarea>
+            </label>
+        </p>
+
+        <p>
+            <label><b>Filter by Specific Invoice (Optional):</b><br>
+            <select name="invoice_filter" style="padding: 6px; font-size: 14px;">
+                <option value="">-- All invoices for {{ vendor_id }} --</option>
+                {% for inv in data.invoices %}
+                    <option value="{{ inv }}">{{ inv }}</option>
+                {% endfor %}
+            </select>
+            </label>
+        </p>
+
+        <p>
+            <button type="submit" style="padding: 8px 18px; font-size: 14px; font-weight: bold; cursor: pointer; background: #2b6cb0; color: white; border: none; border-radius: 4px;">🚀 Ask Question</button>
+        </p>
+    </form>
+
+{% endif %}
+
+</body>
+</html>

@@ -1,0 +1,77 @@
+{% extends 'admin_base.html' %}
+
+{% block title %}Ingest Results — {{ vendor_id }}{% endblock %}
+
+{% block content %}
+<style>
+  .ingest-wrapper { padding: 24px 30px; max-width: 900px; }
+  .ingest-header {
+    background: linear-gradient(135deg, #1a1a2e, #0f3460);
+    border-radius: 14px;
+    padding: 24px 28px;
+    color: #fff;
+    margin-bottom: 24px;
+  }
+  .ingest-header h1 { font-size: 1.5rem; margin: 0 0 4px; }
+  .ingest-header p { margin: 0; opacity: 0.75; font-size: 0.9rem; }
+
+  .result-list { list-style: none; padding: 0; margin: 0; }
+  .result-list li {
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 14px 18px;
+    margin-bottom: 10px;
+    font-size: 0.92rem;
+    line-height: 1.6;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+  }
+  .result-list li:first-child { border-top: 3px solid #48bb78; }
+
+  .back-bar {
+    display: flex;
+    gap: 14px;
+    margin-top: 24px;
+    flex-wrap: wrap;
+  }
+  .back-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 9px 20px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    text-decoration: none;
+    transition: opacity 0.2s;
+  }
+  .back-btn:hover { opacity: 0.85; text-decoration: none; }
+  .btn-blue  { background: #2b6cb0; color: #fff; }
+  .btn-ghost { background: #edf2f7; color: #2d3748; }
+</style>
+
+<div class="ingest-wrapper">
+  <div class="ingest-header">
+    <h1>📥 Ingestion Results</h1>
+    <p>Vendor workspace: <strong>{{ vendor_id }}</strong></p>
+  </div>
+
+  <ul class="result-list">
+    {% for item in results %}
+      <li>{{ item | safe }}</li>
+    {% endfor %}
+  </ul>
+
+  <div class="back-bar">
+    <a class="back-btn btn-blue" href="/admin/ai_assistant?vendor_id={{ vendor_id }}">
+      ← Back to {{ vendor_id }} Workspace
+    </a>
+    <a class="back-btn btn-ghost" href="/admin/ai_assistant">
+      🔄 Switch Vendor
+    </a>
+    <a class="back-btn btn-ghost" href="/admin">
+      🏠 Admin Dashboard
+    </a>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,316 @@
+{% extends 'admin_base.html' %}
+
+{% block title %} System Configuration {% endblock %}
+
+{% block content %}
+
+<div class="container-fluid mt-3">
+
+    <div class="card p-4">
+
+        <div class="d-flex justify-content-between">
+
+            <div>
+                <h2>⚙ System Configuration</h2>
+                <p>
+                    Manage application settings, AI models, OCR providers,
+                    workflow parameters and platform configuration.
+                </p>
+            </div>
+
+            <div>
+                <a href="/admin"
+                   class="btn btn-primary">
+                    🏠 Dashboard
+                </a>
+            </div>
+
+        </div>
+
+        <hr>
+
+        <form method="POST">
+
+            <!-- ================================= -->
+            <!-- APPLICATION SETTINGS -->
+            <!-- ================================= -->
+
+            <h4 class="section-title">
+                🌐 Application Settings
+            </h4>
+
+            <div class="row">
+
+                <div class="col-md-4 mb-3">
+
+                    <label>Application Name</label>
+
+                    <input type="text"
+                           class="form-control"
+                           name="app_name"
+                           value="{{ config.app_name }}">
+
+                </div>
+
+                <div class="col-md-4 mb-3">
+
+                    <label>Environment</label>
+
+                    <select name="environment"
+                            class="form-control">
+
+                        <option value="DEV"
+                            {% if config.environment == 'DEV' %}
+                            selected
+                            {% endif %}>
+                            DEV
+                        </option>
+
+                        <option value="TEST"
+                            {% if config.environment == 'TEST' %}
+                            selected
+                            {% endif %}>
+                            TEST
+                        </option>
+
+                        <option value="PROD"
+                            {% if config.environment == 'PROD' %}
+                            selected
+                            {% endif %}>
+                            PROD
+                        </option>
+
+                    </select>
+
+                </div>
+
+                <div class="col-md-4 mb-3">
+
+                    <label>Default Currency</label>
+
+                    <input type="text"
+                           class="form-control"
+                           name="currency"
+                           value="{{ config.currency }}">
+
+                </div>
+
+            </div>
+
+            <!-- ================================= -->
+            <!-- AI MODEL SETTINGS -->
+            <!-- ================================= -->
+
+            <h4 class="section-title">
+                🤖 AI Model Configuration
+            </h4>
+
+            <div class="row">
+
+                <div class="col-md-4 mb-3">
+
+                    <label>LLM Provider</label>
+
+                    <select name="llm_provider"
+                            class="form-control">
+
+                        <option>OpenAI</option>
+                        <option>Google Gemini</option>
+                        <option>Anthropic Claude</option>
+                        <option>Groq</option>
+                        <option>Ollama</option>
+
+                    </select>
+
+                </div>
+
+                <div class="col-md-4 mb-3">
+
+                    <label>Model Name</label>
+
+                    <input type="text"
+                           name="model_name"
+                           class="form-control"
+                           value="{{ config.model_name }}">
+
+                </div>
+
+                <div class="col-md-4 mb-3">
+
+                    <label>Temperature</label>
+
+                    <input type="number"
+                           step="0.1"
+                           min="0"
+                           max="1"
+                           name="temperature"
+                           class="form-control"
+                           value="{{ config.temperature }}">
+
+                </div>
+
+            </div>
+
+            <!-- ================================= -->
+            <!-- OCR CONFIGURATION -->
+            <!-- ================================= -->
+
+            <h4 class="section-title">
+                📄 OCR Provider Configuration
+            </h4>
+
+            <div class="row">
+
+                <div class="col-md-4 mb-3">
+
+                    <label>OCR Provider</label>
+
+                    <select name="ocr_provider"
+                            class="form-control">
+
+                        <option>LlamaParse</option>
+                        <option>Azure OCR</option>
+                        <option>AWS Textract</option>
+                        <option>Google Vision</option>
+                        <option>Docling</option>
+
+                    </select>
+
+                </div>
+
+                <div class="col-md-4 mb-3">
+
+                    <label>Confidence Threshold</label>
+
+                    <input type="number"
+                           step="0.01"
+                           min="0"
+                           max="1"
+                           name="confidence_threshold"
+                           class="form-control"
+                           value="{{ config.confidence_threshold }}">
+
+                </div>
+
+            </div>
+
+            <!-- ================================= -->
+            <!-- WORKFLOW -->
+            <!-- ================================= -->
+
+            <h4 class="section-title">
+                🔄 Workflow Configuration
+            </h4>
+
+            <div class="row">
+
+                <div class="col-md-4 mb-3">
+
+                    <label>Approval Levels</label>
+
+                    <input type="number"
+                           name="approval_levels"
+                           class="form-control"
+                           value="{{ config.approval_levels }}">
+
+                </div>
+
+                <div class="col-md-4 mb-3">
+
+                    <label>Auto Approve Amount</label>
+
+                    <input type="number"
+                           name="auto_approve_limit"
+                           class="form-control"
+                           value="{{ config.auto_approve_limit }}">
+
+                </div>
+
+            </div>
+
+            <!-- ================================= -->
+            <!-- EMAIL -->
+            <!-- ================================= -->
+
+            <h4 class="section-title">
+                📧 Email Notifications
+            </h4>
+
+            <div class="row">
+
+                <div class="col-md-4 mb-3">
+
+                    <label>SMTP Server</label>
+
+                    <input type="text"
+                           name="smtp_server"
+                           class="form-control"
+                           value="{{ config.smtp_server }}">
+
+                </div>
+
+                <div class="col-md-4 mb-3">
+
+                    <label>SMTP Port</label>
+
+                    <input type="number"
+                           name="smtp_port"
+                           class="form-control"
+                           value="{{ config.smtp_port }}">
+
+                </div>
+
+            </div>
+
+            <!-- ================================= -->
+            <!-- API KEYS -->
+            <!-- ================================= -->
+
+            <h4 class="section-title">
+                🔑 API Keys
+            </h4>
+
+            <div class="row">
+
+                <div class="col-md-6 mb-3">
+
+                    <label>OpenAI API Key</label>
+
+                    <input type="password"
+                           name="openai_key"
+                           class="form-control"
+                           value="{{ config.openai_key }}">
+
+                </div>
+
+                <div class="col-md-6 mb-3">
+
+                    <label>Gemini API Key</label>
+
+                    <input type="password"
+                           name="gemini_key"
+                           class="form-control"
+                           value="{{ config.gemini_key }}">
+
+                </div>
+
+            </div>
+
+            <hr>
+
+            <button class="btn btn-success">
+                💾 Save Configuration
+            </button>
+
+            <a href="/admin"
+               class="btn btn-primary">
+                🏠 Dashboard
+            </a>
+
+        </form>
+
+    </div>
+
+</div>
+
+{% endblock %}

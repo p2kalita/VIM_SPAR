@@ -1,0 +1,701 @@
+{% extends 'admin_base.html' %}
+
+{% block title %} Invoice Event Browser {% endblock %}
+
+{% block content %}
+
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  /* ── Top bar ─────────────────────────────────────── */
+  .ev-topbar {
+    background: #fff;
+    border-bottom: 1px solid #e0e0e0;
+    padding: 12px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    border-radius: 10px 10px 0 0;
+  }
+  .ev-topbar-left { display: flex; align-items: center; gap: 12px; }
+  .ev-topbar-left h1 { font-size: 16px; font-weight: 600; color: #111; }
+  .ev-topbar-right { display: flex; align-items: center; gap: 14px; }
+  .ev-last-updated { font-size: 13px; color: #666; }
+
+  /* Auto-refresh pill */
+  .ev-refresh-pill {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 12.5px; color: #555;
+  }
+  .ev-pulse-dot {
+    width: 8px; height: 8px; border-radius: 50%; background: #1c8a5a;
+    animation: ev-pulse 2s infinite;
+  }
+  @keyframes ev-pulse {
+    0%  { box-shadow: 0 0 0 0 rgba(28,138,90,.5); }
+    70% { box-shadow: 0 0 0 6px rgba(28,138,90,0); }
+    100%{ box-shadow: 0 0 0 0 rgba(28,138,90,0); }
+  }
+
+  .ev-btn-pause {
+    padding: 4px 12px;
+    border: 1px solid #ccc;
+    border-radius: 20px;
+    background: #fff;
+    font-size: 12.5px;
+    cursor: pointer;
+    color: #333;
+    transition: background 0.15s;
+  }
+  .ev-btn-pause:hover { background: #f5f5f5; }
+
+  .ev-btn-refresh {
+    display: flex; align-items: center; gap: 6px;
+    padding: 6px 14px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    background: #fff;
+    font-size: 13px;
+    cursor: pointer;
+    color: #333;
+    transition: background 0.15s;
+  }
+  .ev-btn-refresh:hover { background: #f5f5f5; }
+  .ev-btn-refresh svg { width: 14px; height: 14px; transition: transform 0.6s; }
+  .ev-btn-refresh.spinning svg { animation: ev-spin 0.8s linear infinite; }
+  @keyframes ev-spin { to { transform: rotate(360deg); } }
+
+  /* ── Main content ────────────────────────────────── */
+  .ev-container { padding: 24px; }
+
+  /* ── Summary cards ───────────────────────────────── */
+  .ev-summary-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+  .ev-summary-card {
+    background: #fff;
+    border: 1px solid #e4e4e4;
+    border-radius: 10px;
+    padding: 18px 20px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+  }
+  .ev-summary-card .ev-label {
+    font-size: 11px; font-weight: 600; letter-spacing: 0.06em;
+    text-transform: uppercase; color: #888; margin-bottom: 6px;
+  }
+  .ev-summary-card .ev-count { font-size: 32px; font-weight: 600; line-height: 1; }
+  .ev-count.ev-total   { color: #333; }
+  .ev-count.ev-success { color: #1c8a5a; }
+  .ev-count.ev-failed  { color: #c0392b; }
+  .ev-count.ev-pending { color: #b4790f; }
+
+  /* ── Toolbar ─────────────────────────────────────── */
+  .ev-toolbar {
+    background: #fff;
+    border: 1px solid #e4e4e4;
+    border-radius: 10px;
+    padding: 12px 16px;
+    margin-bottom: 16px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+  }
+  .ev-toolbar select, .ev-toolbar input {
+    font-size: 13px;
+    padding: 6px 10px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    background: #fff;
+    color: #222;
+    outline: none;
+  }
+  .ev-toolbar select:focus, .ev-toolbar input:focus {
+    border-color: #3454d1;
+    box-shadow: 0 0 0 3px rgba(52,84,209,0.12);
+  }
+  #ev-search { flex: 1; min-width: 200px; }
+  #ev-clear-filters {
+    padding: 6px 14px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    background: #fff;
+    font-size: 13px;
+    cursor: pointer;
+    color: #333;
+    transition: background 0.12s;
+    white-space: nowrap;
+  }
+  #ev-clear-filters:hover { background: #f5f5f5; }
+
+  /* ── Table ───────────────────────────────────────── */
+  .ev-table-wrap {
+    background: #fff;
+    border: 1px solid #e4e4e4;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+  }
+  .ev-table-wrap table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .ev-table-wrap thead tr { background: #fafafa; border-bottom: 1px solid #e8e8e8; }
+  .ev-table-wrap th {
+    padding: 11px 16px; text-align: left;
+    font-size: 11px; font-weight: 600; letter-spacing: 0.06em;
+    text-transform: uppercase; color: #888; white-space: nowrap;
+  }
+  .ev-table-wrap tbody tr { border-bottom: 1px solid #f0f0f0; transition: background 0.1s; cursor: pointer; }
+  .ev-table-wrap tbody tr:last-child { border-bottom: none; }
+  .ev-table-wrap tbody tr:hover { background: #fafafa; }
+  .ev-table-wrap td { padding: 12px 16px; vertical-align: middle; color: #222; }
+  .mono { font-family: "JetBrains Mono","Fira Code","SF Mono", monospace; font-size: 0.85em; }
+
+  /* ── Stage pill ──────────────────────────────────── */
+  .ev-stage-pill {
+    font-size: 11px; color: #555; background: #f2f2f2;
+    border-radius: 4px; padding: 3px 8px; white-space: nowrap;
+  }
+
+  /* ── Status badge ────────────────────────────────── */
+  .ev-badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; white-space: nowrap; text-transform: capitalize; }
+  .ev-st-success  { color: #1c8a5a; background: #e3f5ec; }
+  .ev-st-failed   { color: #c23b3b; background: #fbe9e9; }
+  .ev-st-pending  { color: #b4790f; background: #fbf0dd; }
+  .ev-st-deleted  { color: #c23b3b; background: #fbe9e9; }
+  .ev-st-updated  { color: #3454d1; background: #e8ecfb; }
+  .ev-st-acknowledged { color: #5b6472; background: #eef0f3; }
+  .ev-st-ignored  { color: #5b6472; background: #eef0f3; }
+
+  /* ── Actions ─────────────────────────────────────── */
+  .ev-btn-details {
+    padding: 4px 12px; border: 1px solid #ccc; border-radius: 5px;
+    background: #fff; font-size: 12px; cursor: pointer; color: #333;
+    transition: background 0.12s, border-color 0.12s; white-space: nowrap;
+  }
+  .ev-btn-details:hover { background: #f5f5f5; border-color: #aaa; }
+
+  /* ── Empty state ─────────────────────────────────── */
+  .ev-empty { text-align: center; padding: 60px 20px; color: #aaa; font-size: 14px; }
+
+  /* ── Footer / pagination ─────────────────────────── */
+  .ev-footer {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 10px 16px; font-size: 12.5px; color: #666;
+    border-top: 1px solid #f0f0f0;
+  }
+  .ev-page-controls { display: flex; align-items: center; gap: 8px; }
+  .ev-btn-page {
+    padding: 4px 12px; border: 1px solid #ccc; border-radius: 5px;
+    background: #fff; font-size: 12.5px; cursor: pointer; color: #333;
+    transition: background 0.12s;
+  }
+  .ev-btn-page:hover:not(:disabled) { background: #f5f5f5; }
+  .ev-btn-page:disabled { opacity: 0.4; cursor: default; }
+  .ev-page-label { font-family: monospace; font-size: 13px; }
+
+  /* ── Detail modal ────────────────────────────────── */
+  .ev-modal-overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,0.4); z-index: 9999;
+    align-items: center; justify-content: center;
+  }
+  .ev-modal-overlay.open { display: flex; }
+  .ev-modal {
+    background: #fff; border-radius: 12px;
+    width: 560px; max-width: 95vw; max-height: 85vh; overflow-y: auto;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.2);
+  }
+  .ev-modal-header {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 18px 22px; border-bottom: 1px solid #efefef; position: sticky; top: 0; background: #fff;
+  }
+  .ev-modal-header h2 { font-size: 15px; font-weight: 600; }
+  .ev-modal-close { background: none; border: none; cursor: pointer; font-size: 20px; color: #888; padding: 0 4px; }
+  .ev-modal-close:hover { color: #222; }
+  .ev-modal-body { padding: 20px 22px; }
+  .ev-modal-row { display: flex; gap: 12px; margin-bottom: 12px; font-size: 13px; }
+  .ev-modal-row .k { min-width: 110px; color: #888; font-weight: 500; flex-shrink: 0; }
+  .ev-modal-row .v { color: #111; word-break: break-all; }
+  .ev-modal-payload {
+    background: #0d1117; color: #c9d1d9; padding: 14px; border-radius: 8px;
+    font-family: "JetBrains Mono","Fira Code", monospace; font-size: 12px;
+    max-height: 280px; overflow: auto; white-space: pre-wrap; word-break: break-all;
+    margin-top: 8px;
+  }
+  .ev-modal-footer {
+    display: flex; gap: 10px; justify-content: flex-end;
+    padding: 14px 22px; border-top: 1px solid #efefef;
+  }
+  .ev-action-btn {
+    padding: 7px 18px; border-radius: 6px; font-size: 13px;
+    cursor: pointer; font-weight: 500; transition: opacity 0.15s;
+  }
+  .ev-action-btn:hover { opacity: 0.8; }
+  .ev-action-btn.delete { background: #fbe9e9; color: #c23b3b; border: 1px solid #c23b3b; }
+  .ev-action-btn.update { background: #e8ecfb; color: #3454d1; border: 1px solid #3454d1; }
+
+  /* ── Error banner ────────────────────────────────── */
+  .ev-error-banner {
+    background: #fbe9e9; color: #c23b3b; border: 1px solid #f5b7b1;
+    border-radius: 8px; padding: 12px 16px; margin-bottom: 16px;
+    font-size: 13px; display: none;
+  }
+
+  /* ── Toast ───────────────────────────────────────── */
+  #ev-toast-container { position: fixed; bottom: 24px; right: 24px; z-index: 99999; display: flex; flex-direction: column; gap: 8px; }
+  .ev-toast {
+    padding: 12px 18px; border-radius: 8px; font-size: 13px; font-weight: 500;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.15); animation: ev-toast-in 0.25s ease;
+  }
+  .ev-toast.ok  { background: #e3f5ec; color: #1c8a5a; border: 1px solid #a3d9bc; }
+  .ev-toast.err { background: #fbe9e9; color: #c23b3b; border: 1px solid #f5b7b1; }
+  @keyframes ev-toast-in { from { opacity:0; transform: translateY(10px); } to { opacity:1; transform: translateY(0); } }
+
+  /* ── Responsive ──────────────────────────────────── */
+  @media (max-width: 768px) {
+    .ev-summary-grid { grid-template-columns: repeat(2, 1fr); }
+    .ev-table-wrap th:nth-child(4), .ev-table-wrap td:nth-child(4),
+    .ev-table-wrap th:nth-child(5), .ev-table-wrap td:nth-child(5) { display: none; }
+  }
+</style>
+
+<!-- Event Browser Panel -->
+<div class="ev-container">
+
+  <!-- Top Bar -->
+  <div class="ev-topbar">
+    <div class="ev-topbar-left">
+      <h1>🚨 Invoice Event Browser</h1>
+    </div>
+    <div class="ev-topbar-right">
+      <div class="ev-refresh-pill">
+        <span class="ev-pulse-dot" id="ev-pulse-dot"></span>
+        <span id="ev-refresh-label">Auto-refreshing every 2s</span>
+        <button class="ev-btn-pause" id="ev-pause-btn">Pause</button>
+      </div>
+      <span class="ev-last-updated" id="ev-last-updated">Loading…</span>
+      <button class="ev-btn-refresh" id="ev-btn-refresh" onclick="evRefresh()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="23 4 23 10 17 10"/>
+          <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+        </svg>
+        Refresh
+      </button>
+    </div>
+  </div>
+
+  <!-- Error Banner -->
+  <div class="ev-error-banner" id="ev-error-banner"></div>
+
+  <!-- Summary cards -->
+  <div class="ev-summary-grid" style="margin-top:20px;">
+    <div class="ev-summary-card">
+      <div class="ev-label">Total Events</div>
+      <div class="ev-count ev-total" id="ev-cnt-total">—</div>
+    </div>
+    <div class="ev-summary-card">
+      <div class="ev-label">Success</div>
+      <div class="ev-count ev-success" id="ev-cnt-success">—</div>
+    </div>
+    <div class="ev-summary-card">
+      <div class="ev-label">Failed</div>
+      <div class="ev-count ev-failed" id="ev-cnt-failed">—</div>
+    </div>
+    <div class="ev-summary-card">
+      <div class="ev-label">Pending</div>
+      <div class="ev-count ev-pending" id="ev-cnt-pending">—</div>
+    </div>
+  </div>
+
+  <!-- Toolbar -->
+  <div class="ev-toolbar">
+    <input id="ev-search" type="text" placeholder="Search invoice ID or event ID…">
+
+    <select id="ev-status-filter">
+      <option value="">All statuses</option>
+    </select>
+
+    <select id="ev-stage-filter">
+      <option value="">All stages</option>
+    </select>
+
+    <select id="ev-type-filter">
+      <option value="">All event types</option>
+    </select>
+
+    <select id="ev-time-filter">
+      <option value="">All time</option>
+      <option value="15m">Last 15 minutes</option>
+      <option value="1h">Last hour</option>
+      <option value="24h">Last 24 hours</option>
+      <option value="3d">Last 3 days</option>
+    </select>
+
+    <button id="ev-clear-filters">Clear filters</button>
+  </div>
+
+  <!-- Table -->
+  <div class="ev-table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Event ID</th>
+          <th>Invoice</th>
+          <th>Stage</th>
+          <th>Event Type</th>
+          <th>Status</th>
+          <th>Timestamp</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody id="ev-tbody"></tbody>
+    </table>
+    <div id="ev-empty-state" class="ev-empty" style="display:none;">
+      <div style="font-size:28px;margin-bottom:10px;">◌</div>
+      <strong>No events match these filters.</strong><br>
+      Try clearing a filter or widening the time range.
+    </div>
+    <footer class="ev-footer">
+      <span id="ev-result-count">Loading…</span>
+      <div class="ev-page-controls">
+        <button class="ev-btn-page" id="ev-prev-page">‹ Prev</button>
+        <span class="ev-page-label" id="ev-page-label">1 / 1</span>
+        <button class="ev-btn-page" id="ev-next-page">Next ›</button>
+      </div>
+    </footer>
+  </div>
+
+</div>
+
+<!-- Detail Modal -->
+<div class="ev-modal-overlay" id="ev-modal" onclick="evCloseModal(event)">
+  <div class="ev-modal">
+    <div class="ev-modal-header">
+      <h2>Event Detail <span id="ev-modal-id" style="font-family:monospace;font-size:12px;color:#888;"></span></h2>
+      <button class="ev-modal-close" onclick="evCloseModal()">×</button>
+    </div>
+    <div class="ev-modal-body" id="ev-modal-body"></div>
+    <div class="ev-modal-footer">
+      <button class="ev-action-btn delete" id="ev-action-delete">Delete</button>
+      <button class="ev-action-btn update" id="ev-action-update">Mark Updated</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast container -->
+<div id="ev-toast-container"></div>
+
+<script>
+/* ── Constants ── */
+const EV_API = "/api";
+
+/* ── State ── */
+const evState = {
+  page:      1,
+  page_size: 25,
+  total:     0,
+  search:    "",
+  status:    "",
+  stage:     "",
+  event_type:"",
+  time:      "",
+  selectedId: null,
+  autoRefresh: true,
+};
+
+/* ── Helpers ── */
+function evFmt(iso) {
+  if (!iso) return "—";
+  const d = new Date(iso);
+  return d.toLocaleString("en-GB", {
+    year:"numeric", month:"2-digit", day:"2-digit",
+    hour:"2-digit", minute:"2-digit", second:"2-digit", hour12:false,
+  }).replace(",", "");
+}
+
+function evTimeRangeStart(range) {
+  const map = { "15m": 15*60000, "1h": 3600000, "24h": 86400000, "3d": 3*86400000 };
+  if (!map[range]) return null;
+  return new Date(Date.now() - map[range]).toISOString();
+}
+
+function evStatusClass(s) {
+  return "ev-st-" + (s || "").toLowerCase().replace(/[^a-z]/g, "");
+}
+
+function evEscape(v) {
+  return String(v)
+    .replace(/&/g,"&amp;").replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;");
+}
+
+function evShowError(msg) {
+  const b = document.getElementById("ev-error-banner");
+  b.textContent = "⚠ " + msg;
+  b.style.display = "block";
+}
+function evHideError() {
+  document.getElementById("ev-error-banner").style.display = "none";
+}
+
+/* ── Toast ── */
+function evToast(msg, ok = true) {
+  const el = document.createElement("div");
+  el.className = "ev-toast " + (ok ? "ok" : "err");
+  el.textContent = msg;
+  document.getElementById("ev-toast-container").appendChild(el);
+  setTimeout(() => el.remove(), 3200);
+}
+
+/* ── Facets (dropdown population) ── */
+async function evLoadFacets() {
+  try {
+    const res  = await fetch(`${EV_API}/facets`);
+    const data = await res.json();
+    evFillSelect("ev-status-filter", data.statuses, "All statuses");
+    evFillSelect("ev-stage-filter",  data.stages,   "All stages");
+    evFillSelect("ev-type-filter",   data.event_types, "All event types");
+  } catch (e) {
+    console.warn("Could not load facets:", e);
+  }
+}
+
+function evFillSelect(id, values, placeholder) {
+  const el = document.getElementById(id);
+  const cur = el.value;
+  el.innerHTML = `<option value="">${placeholder}</option>` +
+    (values || []).filter(Boolean).sort()
+      .map(v => `<option value="${evEscape(v)}">${evEscape(v.replace(/_/g," "))}</option>`)
+      .join("");
+  el.value = cur;
+}
+
+/* ── Load events from API ── */
+async function evLoadEvents() {
+  const params = new URLSearchParams({
+    page:      evState.page,
+    page_size: evState.page_size,
+  });
+  if (evState.search)     params.set("q",          evState.search);
+  if (evState.status)     params.set("status",      evState.status);
+  if (evState.stage)      params.set("stage",       evState.stage);
+  if (evState.event_type) params.set("event_type",  evState.event_type);
+  const startTime = evTimeRangeStart(evState.time);
+  if (startTime)          params.set("start_time",  startTime);
+
+  try {
+    const res  = await fetch(`${EV_API}/events?${params.toString()}`);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    evHideError();
+    evState.total = data.total;
+    evRenderTable(data.items);
+    evRenderFooter();
+    evUpdateCounts();
+    const now = new Date().toLocaleTimeString("en-GB", { hour12: false });
+    document.getElementById("ev-last-updated").textContent = `Updated ${now}`;
+  } catch (e) {
+    evShowError("Could not reach the events API. Is the Flask server running?");
+    console.error(e);
+  }
+}
+
+/* ── Update summary counts (separate call, always full dataset) ── */
+async function evUpdateCounts() {
+  try {
+    const [total, suc, fail, pend] = await Promise.all([
+      fetch(`${EV_API}/events?page=1&page_size=1`).then(r=>r.json()).then(d=>d.total),
+      fetch(`${EV_API}/events?page=1&page_size=1&status=success`).then(r=>r.json()).then(d=>d.total),
+      fetch(`${EV_API}/events?page=1&page_size=1&status=failed`).then(r=>r.json()).then(d=>d.total),
+      fetch(`${EV_API}/events?page=1&page_size=1&status=pending`).then(r=>r.json()).then(d=>d.total),
+    ]);
+    document.getElementById("ev-cnt-total").textContent   = total;
+    document.getElementById("ev-cnt-success").textContent = suc;
+    document.getElementById("ev-cnt-failed").textContent  = fail;
+    document.getElementById("ev-cnt-pending").textContent = pend;
+  } catch(e) { /* silent */ }
+}
+
+/* ── Render table rows ── */
+function evRenderTable(items) {
+  const tbody = document.getElementById("ev-tbody");
+  const empty = document.getElementById("ev-empty-state");
+
+  if (!items || items.length === 0) {
+    tbody.innerHTML = "";
+    empty.style.display = "block";
+    return;
+  }
+  empty.style.display = "none";
+
+  tbody.innerHTML = items.map(ev => `
+    <tr data-id="${evEscape(ev.id)}">
+      <td class="mono">${evEscape(ev.id.slice(0,8))}…</td>
+      <td class="mono">${evEscape(ev.invoice_id)}</td>
+      <td><span class="ev-stage-pill">${evEscape(ev.stage.replace(/_/g," "))}</span></td>
+      <td>${evEscape(ev.event_type.replace(/_/g," "))}</td>
+      <td><span class="ev-badge ${evStatusClass(ev.status)}">${evEscape(ev.status)}</span></td>
+      <td class="mono" style="font-size:12px;color:#555;">${evEscape(evFmt(ev.created_at))}</td>
+      <td>
+        <button class="ev-btn-details" data-id="${evEscape(ev.id)}"
+                onclick="evOpenModal(event,'${evEscape(ev.id)}')">Details</button>
+      </td>
+    </tr>
+  `).join("");
+
+  // Row click opens modal (except the button which handles its own click)
+  tbody.querySelectorAll("tr").forEach(row => {
+    row.addEventListener("click", e => {
+      if (e.target.closest(".ev-btn-details")) return;
+      evOpenModal(null, row.dataset.id);
+    });
+  });
+}
+
+/* ── Render footer / pagination ── */
+function evRenderFooter() {
+  const totalPages = Math.max(1, Math.ceil(evState.total / evState.page_size));
+  document.getElementById("ev-result-count").textContent =
+    `${evState.total} event${evState.total === 1 ? "" : "s"} found`;
+  document.getElementById("ev-page-label").textContent =
+    `${evState.page} / ${totalPages}`;
+  document.getElementById("ev-prev-page").disabled = evState.page <= 1;
+  document.getElementById("ev-next-page").disabled = evState.page >= totalPages;
+}
+
+/* ── Detail Modal ── */
+async function evOpenModal(e, id) {
+  if (e) e.stopPropagation();
+  try {
+    const res = await fetch(`${EV_API}/events/${id}`);
+    if (!res.ok) { evToast("Could not load event detail.", false); return; }
+    const ev = await res.json();
+    evState.selectedId = ev.id;
+
+    document.getElementById("ev-modal-id").textContent = ev.id;
+    document.getElementById("ev-modal-body").innerHTML = `
+      <div class="ev-modal-row"><span class="k">Invoice ID</span><span class="v mono">${evEscape(ev.invoice_id)}</span></div>
+      <div class="ev-modal-row"><span class="k">Event ID</span><span class="v mono" style="font-size:11px">${evEscape(ev.id)}</span></div>
+      <div class="ev-modal-row"><span class="k">Stage</span><span class="v">${evEscape(ev.stage.replace(/_/g," "))}</span></div>
+      <div class="ev-modal-row"><span class="k">Event Type</span><span class="v">${evEscape(ev.event_type.replace(/_/g," "))}</span></div>
+      <div class="ev-modal-row"><span class="k">Status</span>
+        <span class="v"><span class="ev-badge ${evStatusClass(ev.status)}">${evEscape(ev.status)}</span></span></div>
+      <div class="ev-modal-row"><span class="k">Timestamp</span><span class="v mono">${evEscape(evFmt(ev.created_at))}</span></div>
+      ${ev.message ? `<div class="ev-modal-row"><span class="k">Message</span><span class="v" style="color:#c23b3b;">${evEscape(ev.message)}</span></div>` : ""}
+      <div class="ev-modal-row"><span class="k">Payload</span><span class="v"></span></div>
+      <div class="ev-modal-payload">${evEscape(JSON.stringify(ev.payload, null, 2))}</div>
+    `;
+    document.getElementById("ev-modal").classList.add("open");
+  } catch (err) {
+    evToast("Failed to fetch event detail.", false);
+  }
+}
+
+function evCloseModal(e) {
+  if (!e || e.target === document.getElementById("ev-modal")) {
+    document.getElementById("ev-modal").classList.remove("open");
+    evState.selectedId = null;
+  }
+}
+
+document.addEventListener("keydown", e => {
+  if (e.key === "Escape") evCloseModal();
+});
+
+/* ── Delete / Update actions ── */
+document.getElementById("ev-action-delete").addEventListener("click", () => evDoAction("DELETE", "delete"));
+document.getElementById("ev-action-update").addEventListener("click", () => evDoAction("PUT",    "update"));
+
+async function evDoAction(method, label) {
+  if (!evState.selectedId) return;
+  try {
+    const res = await fetch(`${EV_API}/events/${evState.selectedId}`, { method });
+    if (res.ok) {
+      evToast(`Event ${label}d successfully.`);
+      evCloseModal();
+      evLoadEvents();
+    } else {
+      evToast(`Action failed (${res.status}).`, false);
+    }
+  } catch (err) {
+    evToast("Network error — action failed.", false);
+  }
+}
+
+/* ── Filter controls ── */
+let evSearchTimer;
+document.getElementById("ev-search").addEventListener("input", e => {
+  clearTimeout(evSearchTimer);
+  evSearchTimer = setTimeout(() => {
+    evState.search = e.target.value.trim();
+    evState.page = 1;
+    evLoadEvents();
+  }, 300);
+});
+
+[["ev-status-filter","status"],["ev-stage-filter","stage"],
+ ["ev-type-filter","event_type"],["ev-time-filter","time"]].forEach(([id, key]) => {
+  document.getElementById(id).addEventListener("change", e => {
+    evState[key] = e.target.value;
+    evState.page = 1;
+    evLoadEvents();
+  });
+});
+
+document.getElementById("ev-clear-filters").addEventListener("click", () => {
+  evState.search = ""; evState.status = ""; evState.stage = "";
+  evState.event_type = ""; evState.time = ""; evState.page = 1;
+  document.getElementById("ev-search").value          = "";
+  document.getElementById("ev-status-filter").value   = "";
+  document.getElementById("ev-stage-filter").value    = "";
+  document.getElementById("ev-type-filter").value     = "";
+  document.getElementById("ev-time-filter").value     = "";
+  evLoadEvents();
+});
+
+/* ── Pagination ── */
+document.getElementById("ev-prev-page").addEventListener("click", () => {
+  if (evState.page > 1) { evState.page--; evLoadEvents(); }
+});
+document.getElementById("ev-next-page").addEventListener("click", () => {
+  const total = Math.max(1, Math.ceil(evState.total / evState.page_size));
+  if (evState.page < total) { evState.page++; evLoadEvents(); }
+});
+
+/* ── Auto-refresh ── */
+let evRefreshTimer;
+function evStartAutoRefresh() {
+  evRefreshTimer = setInterval(() => { if (evState.autoRefresh) evLoadEvents(); }, 2000);
+}
+document.getElementById("ev-pause-btn").addEventListener("click", e => {
+  evState.autoRefresh = !evState.autoRefresh;
+  e.target.textContent = evState.autoRefresh ? "Pause" : "Resume";
+  document.getElementById("ev-refresh-label").textContent =
+    evState.autoRefresh ? "Auto-refreshing every 2s" : "Auto-refresh paused";
+  document.getElementById("ev-pulse-dot").style.background =
+    evState.autoRefresh ? "#1c8a5a" : "#aaa";
+});
+
+/* ── Manual refresh button ── */
+function evRefresh() {
+  const btn = document.getElementById("ev-btn-refresh");
+  btn.classList.add("spinning");
+  evLoadEvents().finally(() => {
+    setTimeout(() => btn.classList.remove("spinning"), 400);
+  });
+}
+
+/* ── Boot ── */
+(async function evBoot() {
+  await evLoadFacets();
+  await evLoadEvents();
+  evStartAutoRefresh();
+})();
+</script>
+
+{% endblock %}

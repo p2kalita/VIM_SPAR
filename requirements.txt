@@ -1,0 +1,19 @@
+flask
+flask-sqlalchemy
+python-dotenv
+groq
+llama-parse
+llama-index-core
+Pillow
+werkzeug
+markdown
+
+# ── RAG (ChromaDB + CrewAI + Gemini) ──────────────────────────────────────────
+crewai>=0.80.0
+crewai-tools>=0.14.0
+chromadb>=0.5.0
+sentence-transformers>=3.0.0
+google-generativeai>=0.8.0
+langchain-google-genai>=2.0.0
+tenacity>=8.2.0
+pypdf>=4.0.0

@@ -1,0 +1,343 @@
+/* --- FONT IMPORTS --- */
+/* Imports various fonts from Google Fonts to be used throughout the application. */
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Pacifico&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Delius+Swash+Caps&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Silkscreen:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
+
+/* --- UNIVERSAL STYLES & RESETS --- */
+/* A universal selector to apply some basic style resets to all elements. */
+*{
+    /* Ensures padding and border are included in the element's total width and height. */
+    box-sizing: border-box;
+    /* Removes default browser margins. */
+    margin: 0;
+    /* Removes default browser padding. */
+    padding: 0;
+    /* Sets the default font for the entire page. */
+    font-family: "Montserrat",sans-serif;
+
+}
+
+/* --- BODY & HTML BASE STYLES --- */
+/* Sets base styles for the entire document. */
+/* ---
+html,body{
+    /* Ensures the body takes up at least the full height of the viewport. */
+    height: 100%;
+    /* Sets a dark blue background color. */
+    background-color: #0b132b;
+    /* Sets the default text color to a light shade for contrast. */
+    color: #edf0f1;
+}
+--- */
+
+html,body {
+	background: #f6f7fb;
+	font-family: "Poppins", sans-serif;
+}
+header {
+	background: linear-gradient(90deg, #0077b6, #00b4d8);
+	color: white;
+	padding: 30px 0;
+	text-align: center;
+}
+
+/* --- MAIN PAGE LAYOUT --- */
+/* A flex container for the main page structure (header, main, footer). */
+.main_page{
+    display: flex;
+    flex-direction: column;
+    /* Ensures the page takes at least the full viewport height, pushing the footer to the bottom. */
+    min-height: 100vh;
+}
+
+/* --- HEADER SECTION --- */
+/* Styles the main header container. */
+.header_section{
+    padding: 10px 4%;
+    border-bottom: 1px solid white;
+    background-color: #090f22;
+
+}
+
+/* Styles the inner content area of the header. */
+.header_canvas{
+    padding: 5px;
+    display: flex;
+    justify-content: space-between; /* Pushes logo/nav and buttons to opposite ends. */
+    align-items: center; /* Vertically aligns items in the header. */
+    /* Adds a subtle inner and outer glow effect. */
+    box-shadow: 
+    inset 0 0 100px rgba(255, 255, 255, 0.11),
+    0 0 150px rgba(255, 255, 255, 0.25);
+
+}
+
+/* --- GENERAL TYPOGRAPHY & LINKS --- */
+/* Sets common styles for list items, links, and buttons for consistency. */
+li,a,button{
+    font-weight: 500;
+    font-size: 16px;
+    /* Inherits text color from the parent element. */
+    color: inherit;
+    /* Removes the default underline from links. */
+    text-decoration: none;
+}
+
+
+/* --- NAVIGATION BAR --- */
+.logo{
+    cursor: pointer;
+}
+
+/* Removes default list styling (e.g., bullets) from the navigation menu. */
+.nav__links{
+    list-style: none;
+}
+
+/* Displays navigation links horizontally. */
+.nav__links li {
+    display: inline-block;
+    padding: 0px 20px;
+}
+
+/* Adds a smooth transition effect for link interactions. */
+.nav__links li a {
+    transition: all 0.3s ease 0s;
+}
+
+/* Changes link color on hover. */
+.nav__links li a:hover {
+    color: #0088a9;
+}
+
+/* Container for buttons on the right side of the navbar. */
+.nav_side_buttons{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* Styles for buttons within the navigation bar. */
+.nav_side_buttons button{
+    padding: 9px 25px;
+    background-color: rgba(0, 136, 169, 1);
+    border: none;
+    border-radius: 50px; /* Creates pill-shaped buttons. */
+    cursor: pointer;
+    transition: all 0.3s ease 0s;
+}
+
+.header_login_button{
+    margin-right: 10px;
+}
+
+#user_icon{
+    height: 21px;
+    
+}
+
+/* Special styling for a signature-like text element in the header. */
+#header_signature{
+    margin-right: 10px;
+    font-family: "Delius Swash Caps";
+    text-decoration: underline;
+    font-size:medium;
+}
+
+/* Darkens the navigation buttons on hover for feedback. */
+.nav_side_buttons button:hover{
+    background-color: rgba(0, 136, 169, 0.8);
+}
+
+/* --- MAIN CONTENT SECTION --- */
+/* Defines the main content area of the page. */
+.main_section{
+    flex: 1; /* Allows this section to grow and fill available space between header and footer. */
+    padding: 20px 10%;
+}
+
+/* --- FORM STYLES --- */
+.form-card{
+    min-width: 370px;
+
+}
+
+/* Adds top margin specifically to the login card. */
+#login-card{
+    margin-top: 90px;
+}
+
+/* A flex container to center form elements on the page. */
+.form_canvas{
+    display: flex;
+    justify-content: center;
+
+}
+
+/* --- FOOTER SECTION --- */
+.footer_section {
+    background-color: #121b33;
+    padding: 20px 10%;
+    text-align: center;
+    color: #edf0f1;
+    border-top: 1px solid white;
+    box-shadow: inset 0 -10px 10px rgba(255, 255, 255, 0.2);
+    
+}
+
+/* --- HOME PAGE STYLES --- */
+/* Main container for the home page content. */
+.home-container{
+
+    display: flex;
+    justify-content: left;
+    align-items: center;
+    overflow-y: auto;
+    
+}
+/* Inner canvas for the home page content area. */
+.home-container-canvas{
+    margin-top: 20px;
+    width: 1200px;
+    background: #f4f4f4;
+    color: #090f22; /* Dark text for the light background. */
+    height: 450px;
+    overflow-y: auto;  
+}
+
+.home-container-heading{
+    margin-left: 200px;
+	color: #0000FF;
+}
+
+
+
+        /* Hero Section */
+        .hero{
+            background:linear-gradient(135deg,#0f4c81,#1e88e5);
+            color:white;
+            text-align:center;
+            padding:100px 20px;
+        }
+
+        .hero h1{
+            font-size:52px;
+            margin-bottom:20px;
+        }
+
+        .hero p{
+            font-size:22px;
+            max-width:900px;
+            margin:auto;
+            line-height:1.6;
+        }
+
+        .hero-buttons{
+            margin-top:40px;
+        }
+
+        .btn{
+            display:inline-block;
+            padding:14px 30px;
+            margin:10px;
+            border-radius:6px;
+            text-decoration:none;
+            font-weight:bold;
+            transition:0.3s;
+        }
+
+        .btn-primary{
+            background:#ffffff;
+            color:#0f4c81;
+        }
+
+        .btn-primary:hover{
+            background:#f0f0f0;
+        }
+
+        .btn-secondary{
+            border:2px solid white;
+            color:white;
+        }
+
+        .btn-secondary:hover{
+            background:white;
+            color:#0f4c81;
+        }
+
+        /* Features */
+        .section{
+            padding:80px 10%;
+        }
+
+        .section-title{
+            text-align:center;
+            margin-bottom:50px;
+        }
+
+        .section-title h2{
+            font-size:40px;
+            color:#0f4c81;
+        }
+
+        .features{
+            display:grid;
+            grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+            gap:25px;
+        }
+
+        .card{
+            background:white;
+            padding:30px;
+            border-radius:10px;
+            box-shadow:0 3px 10px rgba(0,0,0,0.1);
+        }
+
+        .card h3{
+            color:#0f4c81;
+            margin-bottom:15px;
+        }
+
+        .card p{
+            line-height:1.6;
+        }
+
+        /* Benefits */
+        .benefits{
+            background:#eef5fc;
+        }
+
+        .benefit-list{
+            display:grid;
+            grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+            gap:20px;
+        }
+
+        .benefit-item{
+            background:white;
+            padding:20px;
+            border-left:5px solid #1e88e5;
+            border-radius:5px;
+        }
+
+        /* CTA */
+        .cta{
+            text-align:center;
+            background:#0f4c81;
+            color:white;
+            padding:80px 20px;
+        }
+
+        .cta h2{
+            font-size:40px;
+            margin-bottom:20px;
+        }
+
+        .cta p{
+            font-size:18px;
+            margin-bottom:30px;
+        }

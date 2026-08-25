@@ -1,0 +1,194 @@
+{% extends 'admin_base.html' %}
+
+{% block title %} User Management {% endblock %}
+
+{% block content %}
+
+<nav aria-label="breadcrumb" class="mb-3">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item">
+            <a href="/admin">Dashboard</a>
+        </li>
+        <li class="breadcrumb-item active">
+            User Management
+        </li>
+    </ol>
+</nav>
+
+<div class="container-fluid mt-3">
+
+    <div class="card p-4">
+
+        <div class="d-flex justify-content-between">
+
+            <div>
+                <h2>🏢 Vendor Management</h2>
+                <p>
+                    Register, update and manage vendor profiles and master data.
+                </p>
+            </div>
+
+            <div>
+                <a href="/admin" class="btn btn-primary">
+                    🏠 Dashboard
+                </a>
+            </div>
+
+        </div>
+
+        <hr>
+
+        <form method="POST"
+              action="/admin/vendors/add">
+
+            <div class="row">
+
+                <div class="col-md-4 mb-3">
+                    <label>Vendor Name</label>
+                    <input type="text"
+                           name="vendor_name"
+                           class="form-control"
+                           required>
+                </div>
+
+                <div class="col-md-4 mb-3">
+                    <label>GST Number</label>
+                    <input type="text"
+                           name="gst_number"
+                           class="form-control"
+                           required>
+                </div>
+
+                <div class="col-md-4 mb-3">
+                    <label>Email</label>
+                    <input type="email"
+                           name="email"
+                           class="form-control"
+                           required>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label>Address</label>
+                    <textarea name="address"
+                              class="form-control"
+                              rows="3"></textarea>
+                </div>
+
+                <div class="col-md-3 mb-3">
+                    <label>Phone Number</label>
+                    <input type="text"
+                           name="phone"
+                           class="form-control">
+                </div>
+
+                <div class="col-md-3 mb-3">
+                    <label>Status</label>
+
+                    <select name="status"
+                            class="form-control">
+
+                        <option value="1">
+                            Active
+                        </option>
+
+                        <option value="0">
+                            Inactive
+                        </option>
+
+                    </select>
+                </div>
+
+            </div>
+
+            <button class="btn btn-success"
+                    type="submit">
+
+                ➕ Add Vendor
+
+            </button>
+
+        </form>
+
+    </div>
+
+    <br>
+
+    <div class="card p-4">
+
+        <h3>Registered Vendors</h3>
+
+        <table class="table table-bordered table-hover">
+
+            <thead class="table-primary">
+
+                <tr>
+                    <th>ID</th>
+                    <th>Vendor Name</th>
+                    <th>GST Number</th>
+                    <th>Email</th>
+                    <th>Phone</th>
+                    <th>Status</th>
+                    <th width="220">Actions</th>
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+                {% for vendor in vendors %}
+
+                <tr>
+
+                    <td>{{ vendor.VendorID }}</td>
+                    <td>{{ vendor.VendorName }}</td>
+                    <td>{{ vendor.GSTNumber }}</td>
+                    <td>{{ vendor.Email }}</td>
+                    <td>{{ vendor.PhoneNumber }}</td>
+
+                    <td>
+
+                        {% if vendor.Status == 1 %}
+                            <span class="badge bg-success">
+                                Active
+                            </span>
+                        {% else %}
+                            <span class="badge bg-danger">
+                                Inactive
+                            </span>
+                        {% endif %}
+
+                    </td>
+
+                    <td>
+
+                        <a href="/admin/vendors/edit/{{ vendor.VendorID }}"
+                           class="btn btn-warning btn-sm">
+                            Edit
+                        </a>
+
+                        <a href="/admin/vendors/toggle/{{ vendor.VendorID }}"
+                           class="btn btn-secondary btn-sm">
+                            Enable/Disable
+                        </a>
+
+                        <a href="/admin/vendors/delete/{{ vendor.VendorID }}"
+                           class="btn btn-danger btn-sm"
+                           onclick="return confirm('Delete Vendor ?')">
+                            Delete
+                        </a>
+
+                    </td>
+
+                </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
+
+{% endblock %}

@@ -1,0 +1,199 @@
+{% extends 'admin_base.html' %}
+
+{% block title %} Edit User {% endblock %}
+
+{% block content %}
+
+<nav aria-label="breadcrumb" class="mb-3">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item">
+            <a href="/admin">Dashboard</a>
+        </li>
+        <li class="breadcrumb-item">
+            <a href="/admin/users">User Management</a>
+        </li>
+        <li class="breadcrumb-item active">
+            Edit User
+        </li>
+    </ol>
+</nav>
+
+<div class="container-fluid mt-4">
+
+    <div class="card p-4">
+
+        <h2>✏️ Edit User</h2>
+        <p>Update user details, role assignment, vendor mapping, and account status.</p>
+
+        <hr>
+
+        <form method="POST">
+
+            <div class="row">
+
+                <!-- User ID -->
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">
+                        User ID
+                    </label>
+
+                    <input type="text"
+                           class="form-control"
+                           value="{{ user.UserID }}"
+                           readonly>
+                </div>
+
+                <!-- Username -->
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">
+                        User Name
+                    </label>
+
+                    <input type="text"
+                           name="username"
+                           class="form-control"
+                           value="{{ user.Username }}"
+                           required>
+                </div>
+
+                <!-- Email -->
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">
+                        Email
+                    </label>
+
+                    <input type="email"
+                           name="email"
+                           class="form-control"
+                           value="{{ user.Email }}"
+                           required>
+                </div>
+
+                <!-- Password -->
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">
+                        Password
+                    </label>
+
+                    <input type="password"
+                           name="password"
+                           class="form-control"
+                           placeholder="Leave blank to keep existing password">
+                </div>
+
+                <!-- Role -->
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">
+                        Role
+                    </label>
+
+                    <select name="role"
+                            class="form-control">
+
+                        <option value="vendor"
+                            {% if user.Role == 'vendor' %}selected{% endif %}>
+                            Vendor User
+                        </option>
+
+                        <option value="approver"
+                            {% if user.Role == 'approver' %}selected{% endif %}>
+                            Approver
+                        </option>
+
+                        <option value="admin"
+                            {% if user.Role == 'admin' %}selected{% endif %}>
+                            Administrator
+                        </option>
+
+                    </select>
+                </div>
+
+                <!-- Vendor -->
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">
+                        Vendor
+                    </label>
+
+                    <select name="vendor_id"
+                            class="form-control">
+
+                        {% for vendor in vendors %}
+
+                        <option value="{{ vendor.VendorID }}"
+                            {% if vendor.VendorID == user.VendorID %}
+                                selected
+                            {% endif %}
+                        >
+                            {{ vendor.VendorName }}
+                        </option>
+
+                        {% endfor %}
+
+                    </select>
+                </div>
+
+                <!-- Status -->
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">
+                        Account Status
+                    </label>
+
+                    <select name="is_active"
+                            class="form-control">
+
+                        <option value="1"
+                            {% if user.IsActive %}
+                                selected
+                            {% endif %}
+                        >
+                            Active
+                        </option>
+
+                        <option value="0"
+                            {% if not user.IsActive %}
+                                selected
+                            {% endif %}
+                        >
+                            Inactive
+                        </option>
+
+                    </select>
+                </div>
+
+                <!-- Created Date -->
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">
+                        Created Date
+                    </label>
+
+                    <input type="text"
+                           class="form-control"
+                           value="{{ user.CreatedDate.strftime('%d-%m-%Y %H:%M') if user.CreatedDate else '' }}"
+                           readonly>
+                </div>
+
+            </div>
+
+            <hr>
+
+            <div class="d-flex gap-2">
+
+                <button type="submit"
+                        class="btn btn-success">
+                    💾 Save Changes
+                </button>
+
+                <a href="/admin/users"
+                   class="btn btn-secondary">
+                    ↩ Back
+                </a>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+{% endblock %}

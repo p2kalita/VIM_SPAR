@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ingestion Results - {{ vendor_id }}</title>
+</head>
+<body style="font-family: Arial, sans-serif; margin: 40px; color: #111; max-width: 800px; line-height: 1.6;">
+    <h1>Ingestion Results</h1>
+    <p>Vendor: <b>{{ vendor_id }}</b></p>
+    <hr>
+    <ul>
+        {% for item in results %}
+            <li>{{ item | safe }}</li>
+        {% endfor %}
+    </ul>
+    <hr>
+    <p><a href="/?vendor_id={{ vendor_id }}" style="font-size: 16px; font-weight: bold; color: #2b6cb0;">&larr; Return to {{ vendor_id }} Dashboard</a></p>
+</body>
+</html>

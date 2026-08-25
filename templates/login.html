@@ -1,0 +1,29 @@
+{% extends 'user_base.html' %}
+
+{% block title %} User Dashboard {% endblock %}
+
+{% block content %}
+
+                <div class="form_canvas">
+                    <div id="login-card" class="form-card">
+                        <form action="/login" method="POST">
+                        <div class="mb-3">
+                            <label for="Email-registration" class="form-label">Enter Your Email(Username):</label>
+                            <input type="email" class="form-control" id="Email-registration" placeholder="pralhad2481@gmail.com" name="email">
+                        </div>
+                        <div class="mb-3">
+                            <label for="Password-registration" class="form-label">Enter a Password</label>
+                            <input type="password" class="form-control" id="Password-registration" name="password">
+                        </div>
+
+                        <div style="text-align: center;">
+                            <input type="submit" class="btn btn-primary" value="Login">
+                            <br>
+                            <br>
+                            Don't have an Account? <a href="/register" style="color:#2ebadde9;">Register</a>
+                        </div>
+                        </form>
+                    </div>
+                </div>
+
+{% endblock %}

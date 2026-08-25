@@ -1,0 +1,199 @@
+{% extends 'admin_base.html' %}
+
+{% block title %} User Management {% endblock %}
+
+{% block content %}
+
+<nav aria-label="breadcrumb" class="mb-3">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item">
+            <a href="/admin">Dashboard</a>
+        </li>
+        <li class="breadcrumb-item active">
+            User Management
+        </li>
+    </ol>
+</nav>
+
+<div class="container-fluid mt-3">
+
+    <div class="card p-4">
+
+        <h2>👥 User Management</h2>
+        <p>
+            Add, update and manage Vendor Users, Approvers and Administrators.
+        </p>
+
+        <hr>
+
+        <!-- Add User Form -->
+        <form method="POST" action="/admin/users/add">
+
+            <div class="row">
+
+                <div class="col-md-4 mb-3">
+                    <label>User Name</label>
+                    <input type="text"
+                           name="username"
+                           class="form-control"
+                           required>
+                </div>
+
+                <div class="col-md-4 mb-3">
+                    <label>Email</label>
+                    <input type="email"
+                           name="email"
+                           class="form-control"
+                           required>
+                </div>
+
+                <div class="col-md-4 mb-3">
+                    <label>Password</label>
+                    <input type="password"
+                           name="password"
+                           class="form-control"
+                           required>
+                </div>
+
+                <div class="col-md-4 mb-3">
+                    <label>Role</label>
+
+                    <select name="role"
+                            class="form-control">
+
+                        <option value="vendor">Vendor User</option>
+                        <option value="approver">Approver</option>
+                        <option value="admin">Administrator</option>
+
+                    </select>
+                </div>
+
+                <div class="col-md-4 mb-3">
+                    <label>Vendor</label>
+
+                    <select name="vendor_id"
+                            class="form-control">
+
+                        {% for vendor in vendors %}
+                        <option value="{{ vendor.VendorID }}">
+                            {{ vendor.VendorName }}
+                        </option>
+                        {% endfor %}
+
+                    </select>
+                </div>
+
+                <div class="col-md-4 mb-3">
+                    <label>Status</label>
+
+                    <select name="is_active"
+                            class="form-control">
+
+                        <option value="1">Active</option>
+                        <option value="0">Inactive</option>
+
+                    </select>
+                </div>
+
+            </div>
+
+            <button type="submit"
+                    class="btn btn-success">
+
+                ➕ Add User
+
+            </button>
+
+        </form>
+
+    </div>
+
+    <br>
+
+    <!-- User List -->
+
+    <div class="card p-4">
+
+        <h3>Registered Users</h3>
+
+        <table class="table table-bordered table-hover">
+
+            <thead class="table-primary">
+
+                <tr>
+                    <th>ID</th>
+                    <th>User Name</th>
+                    <th>Email</th>
+                    <th>Role</th>
+                    <th>Vendor</th>
+                    <th>Status</th>
+                    <th width="220">Actions</th>
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+            {% for user in users %}
+
+                <tr>
+
+                    <td>{{ user.UserID }}</td>
+                    <td>{{ user.Username }}</td>
+                    <td>{{ user.Email }}</td>
+                    <td>{{ user.Role }}</td>
+                    <td>{{ user.vendor.VendorName }}</td>
+
+                    <td>
+
+                        {% if user.IsActive %}
+                            <span class="badge bg-success">
+                                Active
+                            </span>
+                        {% else %}
+                            <span class="badge bg-danger">
+                                Inactive
+                            </span>
+                        {% endif %}
+
+                    </td>
+
+                    <td>
+
+                        <a href="/admin/users/edit/{{ user.UserID }}"
+                           class="btn btn-warning btn-sm">
+
+                            Edit
+
+                        </a>
+
+                        <a href="/admin/users/toggle/{{ user.UserID }}"
+                           class="btn btn-secondary btn-sm">
+
+                            Enable/Disable
+
+                        </a>
+
+                        <a href="/admin/users/delete/{{ user.UserID }}"
+                           class="btn btn-danger btn-sm"
+                           onclick="return confirm('Delete User?')">
+
+                            Delete
+
+                        </a>
+
+                    </td>
+
+                </tr>
+
+            {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
+
+{% endblock %}

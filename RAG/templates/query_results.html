@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Query Results - {{ vendor_id }}</title>
+</head>
+<body style="font-family: Arial, sans-serif; margin: 40px; color: #111; max-width: 850px; line-height: 1.6;">
+    <h1>Query Results</h1>
+    <p><b>Vendor:</b> <code>{{ vendor_id }}</code> | <b>Invoice Filter:</b> {{ filter_display }}</p>
+    <p><b>Question:</b> <i>"{{ query }}"</i></p>
+    <hr>
+    
+    <h2>🤖 CrewAI Agent Synthesized Answer:</h2>
+    <div style="background: #ebf8ff; border: 1px solid #bee3f8; padding: 15px; border-radius: 4px; margin-bottom: 25px;">
+        <pre style="white-space: pre-wrap; font-family: Arial, sans-serif; font-size: 15px; margin: 0;">{{ answer }}</pre>
+    </div>
+
+    <h2>📄 Context Chunks Retrieved from ChromaDB:</h2>
+    <p><small style="color: #666;">Notice that all retrieved chunks are strictly filtered by <code>tenant_id = '{{ vendor_id }}'</code>:</small></p>
+    
+    {% if raw_chunks %}
+        {% for chunk in raw_chunks %}
+            <div style="background: #f7fafc; border-left: 4px solid #4299e1; padding: 10px; margin-bottom: 10px;">
+                <b>Chunk {{ loop.index }}:</b> [Invoice: <code>{{ chunk.invoice_number or 'N/A' }}</code> | Tenant: <code>{{ chunk.tenant_id or 'N/A' }}</code> | Similarity: {{ chunk.score_str }}]<br>
+                <pre style="white-space: pre-wrap; font-size: 13px; margin: 5px 0 0 0;">{{ chunk.text }}</pre>
+            </div>
+        {% endfor %}
+    {% else %}
+        <p><i>No chunks found for vendor '{{ vendor_id }}'. Have you ingested invoices for this vendor yet?</i></p>
+    {% endif %}
+
+    <hr>
+    <p>
+        <a href="/?vendor_id={{ vendor_id }}" style="font-size: 16px; font-weight: bold; color: #2b6cb0;">&larr; Back to {{ vendor_id }} Dashboard</a> | 
+        <a href="/" style="font-size: 16px; font-weight: bold; color: #2b6cb0;">🚪 Login as Another Vendor</a>
+    </p>
+</body>
+</html>

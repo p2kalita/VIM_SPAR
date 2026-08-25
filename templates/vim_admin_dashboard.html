@@ -1,0 +1,85 @@
+{% extends 'admin_base.html' %}
+
+{% block title %} Admin Dashboard {% endblock %}
+
+{% block content %} 
+<div class="container">
+
+    <div class="card">
+        <h3>🏢 Vendor Management</h3>
+        <p>Register, update, and manage vendor profiles and master data.</p>
+        <a class="button" href="/admin/vendors">Open</a>
+    </div>
+
+    <div class="card">
+        <h3>👥 User Management</h3>
+        <p>Add, update, and manage vendor users, approvers, and administrators.</p>
+        <a class="button" href="/admin/users">Open</a>
+    </div>
+
+   <div class="card">
+        <h3>⚙️ System Configuration</h3>
+        <p>Manage application settings, AI models, OCR providers, and workflow parameters.</p>
+        <a class="button" href="/admin/settings">Open</a>
+    </div>
+	
+    <div class="card">
+        <h3>📄 Invoice Upload</h3>
+        <p>Upload invoices in PDF, JPG, PNG, or scanned document formats.</p>
+        <a class="button" href="/admin/invoice_upload">Open</a>
+    </div>
+
+    <div class="card">
+        <h3>🤖 Invoice Data Extraction</h3>
+        <p>Extract invoice details automatically using OCR and AI-powered document processing.</p>
+        <a class="button" href="/admin/invoice_extraction">Open</a>
+    </div>
+
+    <div class="card">
+        <h3>✔ Invoice Validation</h3>
+        <p>Validate invoice data against business rules, vendor information, and purchase orders.</p>
+        <a class="button" href="/admin/invoice_validation">Open</a>
+    </div>
+
+    <div class="card">
+        <h3>🔄 Approval Workflow</h3>
+        <p>Configure and manage invoice approval workflows and routing rules.</p>
+        <a class="button" href="/admin/workflow">Open</a>
+    </div>
+
+    <div class="card">
+        <h3>🧠 AI Assistant (RAG)</h3>
+        <p>Ask questions about invoices, policies, vendors, and documents using AI-powered search.</p>
+        <a class="button" href="/admin/ai_assistant">Open</a>
+    </div>
+
+    <div class="card">
+        <h3>📚 Knowledge Base</h3>
+        <p>Manage policies, contracts, vendor documents, and RAG knowledge sources.</p>
+        <a class="button" href="/admin/knowledgebase">Open</a>
+    </div>
+
+    <div class="card">
+        <h3>📊 Reports & Analytics</h3>
+        <p>View invoice trends, processing metrics, approval statistics, and operational insights.</p>
+        <a class="button" href="/admin/reports">Open</a>
+    </div>
+
+    <div class="card">
+        <h3>📋 Audit Trail</h3>
+        <p>Track invoice activities, approvals, rejections, and user actions for compliance.</p>
+        <a class="button" href="/admin/audit">Open</a>
+    </div>
+
+    <div class="card">
+        <h3>📈 Dashboard</h3>
+        <p>Monitor invoice processing status, pending approvals, and business KPIs in real time.</p>
+        <a class="button" href="/admin/dashboard">Open</a>
+    </div>
+	<div class="card">
+		<h3>🚨 Validation Issues & Exceptions</h3>
+		<p>Monitor invoice validation failures, data quality issues, duplicate invoices, and processing exceptions.</p>
+		<a class="button" href="/admin/issues">Open</a>
+	</div>
+</div>
+{% endblock %}
